@@ -24,7 +24,7 @@ public enum Result<String> {
 
 public struct NetworkManager {
     static let environment : NetworkEnvironment = .production
-    static var APIKey = ""
+    public static var APIKey = ""
     let router = Router<TotalizatorApi>()
     
     public init() {}
