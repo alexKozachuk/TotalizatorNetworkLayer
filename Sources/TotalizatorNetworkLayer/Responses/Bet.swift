@@ -9,9 +9,9 @@ import Foundation
 
 // MARK: - Bet
 public struct Bet: Codable {
-    let accountID, eventID: String
-    let choice: PossibleResult
-    let amount: Int
+    public let accountID, eventID: String
+    public let choice: PossibleResult
+    public let amount: Int
 
     enum CodingKeys: String, CodingKey {
         case accountID = "account_Id"
