@@ -18,6 +18,8 @@ public enum TotalizatorApi {
     case wallet
     case walletHistory
     case makeTransaction(amount: Double, type: TransactionType)
+    case bets
+    case makeBet(amount: Double, choice: PossibleResult, eventID: String)
 }
 
 extension TotalizatorApi: EndPointType {
@@ -47,14 +49,18 @@ extension TotalizatorApi: EndPointType {
             return "/v1/wallet/transactionHistory"
         case .makeTransaction:
             return "/v1/wallet/transaction"
+        case .bets:
+            return "/v1/bet/account"
+        case .makeBet:
+            return "/v1/bet"
         }
     }
     
     var httpMethod: HTTPMethod {
         switch self {
-        case .login, .registration, .makeTransaction:
+        case .login, .registration, .makeTransaction, .makeBet:
             return .post
-        case .feed, .wallet, .walletHistory:
+        case .feed, .wallet, .walletHistory, .bets:
             return .get
         }
     }
@@ -86,8 +92,20 @@ extension TotalizatorApi: EndPointType {
         case .makeTransaction(let amount, let type):
             return .requestParametersAndHeaders(bodyParameters: nil,
                                                 bodyEncoding: .jsonEncoding,
-                                                urlParameters: ["amount":"\(amount)",
+                                                urlParameters: ["amount": amount,
                                                                 "type":type.rawValue],
+                                                additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
+        case .bets:
+            return .requestParametersAndHeaders(bodyParameters: nil,
+                                                bodyEncoding: .jsonEncoding,
+                                                urlParameters: nil,
+                                                additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
+        case .makeBet(let amount, let choice, let eventID):
+            return .requestParametersAndHeaders(bodyParameters: ["event_Id": eventID,
+                                                                 "choice": choice.rawValue,
+                                                                 "amount": amount],
+                                                bodyEncoding: .jsonEncoding,
+                                                urlParameters: nil,
                                                 additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
         default:
             return .request

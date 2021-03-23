@@ -110,7 +110,7 @@ public struct NetworkManager {
     
     // MARK: Events
     
-    public func feed(completion: @escaping (_ jwtToken: Feed?,_ error: String?) -> ()) {
+    public func feed(completion: @escaping (_ feed: Feed?,_ error: String?) -> ()) {
         
         router.request(.feed) { data, response, error in
             
@@ -147,7 +147,7 @@ public struct NetworkManager {
     
     // MARK: Wallet
     
-    public func wallet(completion: @escaping (_ jwtToken: WalletBag?,_ error: String?) -> ()) {
+    public func wallet(completion: @escaping (_ wallet: WalletBag?,_ error: String?) -> ()) {
         
         router.request(.wallet) { data, response, error in
             
@@ -182,7 +182,7 @@ public struct NetworkManager {
         
     }
     
-    public func walletHistory(completion: @escaping (_ jwtToken: WalletHistory?,_ error: String?) -> ()) {
+    public func walletHistory(completion: @escaping (_ walletHistory: WalletHistory?,_ error: String?) -> ()) {
         
         router.request(.walletHistory) { data, response, error in
             
@@ -217,11 +217,11 @@ public struct NetworkManager {
         
     }
     
-    public func walletHistory(amoutn: Double,
+    public func makeTransaction(amount: Double,
                               type: TransactionType,
-                              completion: @escaping (_ jwtToken: WalletBag?,_ error: String?) -> ()) {
+                              completion: @escaping (_ wallet: WalletBag?,_ error: String?) -> ()) {
         
-        router.request(.makeTransaction(amount: amoutn, type: type)) { data, response, error in
+        router.request(.makeTransaction(amount: amount, type: type)) { data, response, error in
             
             if error != nil {
                 completion(nil, "Please check your network connection.")
@@ -245,6 +245,68 @@ public struct NetworkManager {
                         print(error)
                         completion(nil, NetworkResponse.unableToDecode.rawValue)
                     }
+                case .failure(let networkFailureError):
+                    completion(nil, networkFailureError)
+                }
+            }
+            
+        }
+        
+    }
+    
+    // MARK: Bets
+    
+    public func getBets(completion: @escaping (_ bets: Bets?,_ error: String?) -> ()) {
+        
+        router.request(.bets) { data, response, error in
+            
+            if error != nil {
+                completion(nil, "Please check your network connection.")
+            }
+            
+            if let response = response as? HTTPURLResponse {
+                let result = self.handleNetworkResponse(response)
+                switch result {
+                case .success:
+                    guard let responseData = data else {
+                        completion(nil, NetworkResponse.noData.rawValue)
+                        return
+                    }
+                    do {
+                        print(responseData)
+                        let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
+                        print(jsonData)
+                        let apiResponse = try JSONDecoder().decode(Bets.self, from: responseData)
+                        completion(apiResponse,nil)
+                    } catch {
+                        print(error)
+                        completion(nil, NetworkResponse.unableToDecode.rawValue)
+                    }
+                case .failure(let networkFailureError):
+                    completion(nil, networkFailureError)
+                }
+            }
+            
+        }
+        
+    }
+    
+    public func makeBet(amount: Double,
+                        choice: PossibleResult,
+                        eventID: String,
+                        completion: @escaping (_ jwtToken: Bool?,_ error: String?) -> ()) {
+        
+        router.request(.makeBet(amount: amount, choice: choice, eventID: eventID)) { data, response, error in
+            
+            if error != nil {
+                completion(nil, "Please check your network connection.")
+            }
+            
+            if let response = response as? HTTPURLResponse {
+                let result = self.handleNetworkResponse(response)
+                switch result {
+                case .success:
+                    completion(true, nil)
                 case .failure(let networkFailureError):
                     completion(nil, networkFailureError)
                 }
