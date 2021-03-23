@@ -33,35 +33,15 @@ public struct NetworkManager {
     
     public func login(login: String,
                       password: String,
-                      completion: @escaping (_ jwtToken: TokenBag?,_ error: String?) -> ()) {
+                      completion: @escaping (_ jwtToken: TokenBag?,_ error: String?) -> Void) {
         
         router.request(.login(login: login, password: password)) { data, response, error in
             
-            if error != nil {
-                completion(nil, "Please check your network connection.")
-            }
-            
-            if let response = response as? HTTPURLResponse {
-                let result = self.handleNetworkResponse(response)
-                switch result {
-                case .success:
-                    guard let responseData = data else {
-                        completion(nil, NetworkResponse.noData.rawValue)
-                        return
-                    }
-                    do {
-                        print(responseData)
-                        let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
-                        print(jsonData)
-                        let apiResponse = try JSONDecoder().decode(TokenBag.self, from: responseData)
-                        completion(apiResponse,nil)
-                    } catch {
-                        print(error)
-                        completion(nil, NetworkResponse.unableToDecode.rawValue)
-                    }
-                case .failure(let networkFailureError):
-                    completion(nil, networkFailureError)
-                }
+            self.responceDecodable(of: TokenBag.self,
+                                   data: data,
+                                   response: response,
+                                   error: error) { data, error in
+                completion(data, error)
             }
             
         }
@@ -71,37 +51,17 @@ public struct NetworkManager {
     public func registration(login: String,
                       password: String,
                       dateOfBirth: Date,
-                      completion: @escaping (_ jwtToken: TokenBag?,_ error: String?) -> ()) {
+                      completion: @escaping (_ jwtToken: TokenBag?,_ error: String?) -> Void) {
         
         router.request(.registration(login: login,
                                      password: password,
                                      dateOfBirth: dateOfBirth)) { data, response, error in
             
-            if error != nil {
-                completion(nil, "Please check your network connection.")
-            }
-            
-            if let response = response as? HTTPURLResponse {
-                let result = self.handleNetworkResponse(response)
-                switch result {
-                case .success:
-                    guard let responseData = data else {
-                        completion(nil, NetworkResponse.noData.rawValue)
-                        return
-                    }
-                    do {
-                        print(responseData)
-                        let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
-                        print(jsonData)
-                        let apiResponse = try JSONDecoder().decode(TokenBag.self, from: responseData)
-                        completion(apiResponse,nil)
-                    } catch {
-                        print(error)
-                        completion(nil, NetworkResponse.unableToDecode.rawValue)
-                    }
-                case .failure(let networkFailureError):
-                    completion(nil, networkFailureError)
-                }
+            self.responceDecodable(of: TokenBag.self,
+                                   data: data,
+                                   response: response,
+                                   error: error) { data, error in
+                completion(data, error)
             }
             
         }
@@ -110,35 +70,15 @@ public struct NetworkManager {
     
     // MARK: Events
     
-    public func feed(completion: @escaping (_ feed: Feed?,_ error: String?) -> ()) {
+    public func feed(completion: @escaping (_ feed: Feed?,_ error: String?) -> Void) {
         
         router.request(.feed) { data, response, error in
             
-            if error != nil {
-                completion(nil, "Please check your network connection.")
-            }
-            
-            if let response = response as? HTTPURLResponse {
-                let result = self.handleNetworkResponse(response)
-                switch result {
-                case .success:
-                    guard let responseData = data else {
-                        completion(nil, NetworkResponse.noData.rawValue)
-                        return
-                    }
-                    do {
-                        print(responseData)
-                        let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
-                        print(jsonData)
-                        let apiResponse = try JSONDecoder().decode(Feed.self, from: responseData)
-                        completion(apiResponse,nil)
-                    } catch {
-                        print(error)
-                        completion(nil, NetworkResponse.unableToDecode.rawValue)
-                    }
-                case .failure(let networkFailureError):
-                    completion(nil, networkFailureError)
-                }
+            self.responceDecodable(of: Feed.self,
+                                   data: data,
+                                   response: response,
+                                   error: error) { data, error in
+                completion(data, error)
             }
             
         }
@@ -147,70 +87,30 @@ public struct NetworkManager {
     
     // MARK: Wallet
     
-    public func wallet(completion: @escaping (_ wallet: WalletBag?,_ error: String?) -> ()) {
+    public func wallet(completion: @escaping (_ wallet: WalletBag?,_ error: String?) -> Void) {
         
         router.request(.wallet) { data, response, error in
             
-            if error != nil {
-                completion(nil, "Please check your network connection.")
-            }
-            
-            if let response = response as? HTTPURLResponse {
-                let result = self.handleNetworkResponse(response)
-                switch result {
-                case .success:
-                    guard let responseData = data else {
-                        completion(nil, NetworkResponse.noData.rawValue)
-                        return
-                    }
-                    do {
-                        print(responseData)
-                        let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
-                        print(jsonData)
-                        let apiResponse = try JSONDecoder().decode(WalletBag.self, from: responseData)
-                        completion(apiResponse,nil)
-                    } catch {
-                        print(error)
-                        completion(nil, NetworkResponse.unableToDecode.rawValue)
-                    }
-                case .failure(let networkFailureError):
-                    completion(nil, networkFailureError)
-                }
+            self.responceDecodable(of: WalletBag.self,
+                                   data: data,
+                                   response: response,
+                                   error: error) { data, error in
+                completion(data, error)
             }
             
         }
         
     }
     
-    public func walletHistory(completion: @escaping (_ walletHistory: WalletHistory?,_ error: String?) -> ()) {
+    public func walletHistory(completion: @escaping (_ walletHistory: WalletHistory?,_ error: String?) -> Void) {
         
         router.request(.walletHistory) { data, response, error in
             
-            if error != nil {
-                completion(nil, "Please check your network connection.")
-            }
-            
-            if let response = response as? HTTPURLResponse {
-                let result = self.handleNetworkResponse(response)
-                switch result {
-                case .success:
-                    guard let responseData = data else {
-                        completion(nil, NetworkResponse.noData.rawValue)
-                        return
-                    }
-                    do {
-                        print(responseData)
-                        let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
-                        print(jsonData)
-                        let apiResponse = try JSONDecoder().decode(WalletHistory.self, from: responseData)
-                        completion(apiResponse,nil)
-                    } catch {
-                        print(error)
-                        completion(nil, NetworkResponse.unableToDecode.rawValue)
-                    }
-                case .failure(let networkFailureError):
-                    completion(nil, networkFailureError)
-                }
+            self.responceDecodable(of: WalletHistory.self,
+                                   data: data,
+                                   response: response,
+                                   error: error) { data, error in
+                completion(data, error)
             }
             
         }
@@ -219,35 +119,15 @@ public struct NetworkManager {
     
     public func makeTransaction(amount: Double,
                               type: TransactionType,
-                              completion: @escaping (_ wallet: WalletBag?,_ error: String?) -> ()) {
+                              completion: @escaping (_ wallet: WalletBag?,_ error: String?) -> Void) {
         
         router.request(.makeTransaction(amount: amount, type: type)) { data, response, error in
             
-            if error != nil {
-                completion(nil, "Please check your network connection.")
-            }
-            
-            if let response = response as? HTTPURLResponse {
-                let result = self.handleNetworkResponse(response)
-                switch result {
-                case .success:
-                    guard let responseData = data else {
-                        completion(nil, NetworkResponse.noData.rawValue)
-                        return
-                    }
-                    do {
-                        print(responseData)
-                        let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
-                        print(jsonData)
-                        let apiResponse = try JSONDecoder().decode(WalletBag.self, from: responseData)
-                        completion(apiResponse,nil)
-                    } catch {
-                        print(error)
-                        completion(nil, NetworkResponse.unableToDecode.rawValue)
-                    }
-                case .failure(let networkFailureError):
-                    completion(nil, networkFailureError)
-                }
+            self.responceDecodable(of: WalletBag.self,
+                                   data: data,
+                                   response: response,
+                                   error: error) { data, error in
+                completion(data, error)
             }
             
         }
@@ -256,35 +136,15 @@ public struct NetworkManager {
     
     // MARK: Bets
     
-    public func getBets(completion: @escaping (_ bets: Bets?,_ error: String?) -> ()) {
+    public func getBets(completion: @escaping (_ bets: Bets?,_ error: String?) -> Void) {
         
         router.request(.bets) { data, response, error in
             
-            if error != nil {
-                completion(nil, "Please check your network connection.")
-            }
-            
-            if let response = response as? HTTPURLResponse {
-                let result = self.handleNetworkResponse(response)
-                switch result {
-                case .success:
-                    guard let responseData = data else {
-                        completion(nil, NetworkResponse.noData.rawValue)
-                        return
-                    }
-                    do {
-                        print(responseData)
-                        let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
-                        print(jsonData)
-                        let apiResponse = try JSONDecoder().decode(Bets.self, from: responseData)
-                        completion(apiResponse,nil)
-                    } catch {
-                        print(error)
-                        completion(nil, NetworkResponse.unableToDecode.rawValue)
-                    }
-                case .failure(let networkFailureError):
-                    completion(nil, networkFailureError)
-                }
+            self.responceDecodable(of: Bets.self,
+                                   data: data,
+                                   response: response,
+                                   error: error) { data, error in
+                completion(data, error)
             }
             
         }
@@ -294,22 +154,12 @@ public struct NetworkManager {
     public func makeBet(amount: Double,
                         choice: PossibleResult,
                         eventID: String,
-                        completion: @escaping (_ jwtToken: Bool?,_ error: String?) -> ()) {
+                        completion: @escaping (_ error: String?) -> Void) {
         
         router.request(.makeBet(amount: amount, choice: choice, eventID: eventID)) { data, response, error in
             
-            if error != nil {
-                completion(nil, "Please check your network connection.")
-            }
-            
-            if let response = response as? HTTPURLResponse {
-                let result = self.handleNetworkResponse(response)
-                switch result {
-                case .success:
-                    completion(true, nil)
-                case .failure(let networkFailureError):
-                    completion(nil, networkFailureError)
-                }
+            self.response(data: data, response: response, error: error) { error in
+                completion(error)
             }
             
         }
@@ -326,4 +176,63 @@ public struct NetworkManager {
         default: return .failure(NetworkResponse.failed.rawValue)
         }
     }
+}
+
+private extension NetworkManager {
+    
+    func response(data: Data?,
+                  response: URLResponse?,
+                  error: Error?,
+                  completion: @escaping (String?) -> Void) {
+        
+        if error != nil {
+            completion("Please check your network connection.")
+        }
+        
+        if let response = response as? HTTPURLResponse {
+            let result = self.handleNetworkResponse(response)
+            switch result {
+            case .success:
+                completion(nil)
+            case .failure(let networkFailureError):
+                completion(networkFailureError)
+            }
+        }
+        
+    }
+    
+    func responceDecodable<T: Decodable>(of type: T.Type,
+                                         data: Data?,
+                                         response: URLResponse?,
+                                         error: Error?,
+                                         completion: @escaping (_ bets: T?,_ error: String?) -> Void) {
+        
+        
+        if error != nil {
+            completion(nil, "Please check your network connection.")
+        }
+        
+        if let response = response as? HTTPURLResponse {
+            let result = self.handleNetworkResponse(response)
+            switch result {
+            case .success:
+                guard let responseData = data else {
+                    completion(nil, NetworkResponse.noData.rawValue)
+                    return
+                }
+                do {
+                    let apiResponse = try JSONDecoder().decode(T.self, from: responseData)
+                    completion(apiResponse,nil)
+                } catch {
+                    completion(nil, NetworkResponse.unableToDecode.rawValue)
+                }
+            case .failure(let networkFailureError):
+                completion(nil, networkFailureError)
+            }
+        }
+        
+        
+    }
+    
+    
 }
