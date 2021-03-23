@@ -7,6 +7,6 @@
 
 import Foundation
 
-public struct TokenBag: Decodable {
+public struct TokenBag: Decodable, Equatable {
     public var jwtString: String
 }

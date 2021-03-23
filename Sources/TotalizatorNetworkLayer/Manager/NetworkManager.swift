@@ -7,41 +7,38 @@
 
 import Foundation
 
-public enum NetworkResponse: String {
-    case success
+public enum ResponseError: String, Error {
     case authenticationError = "You need to be authenticated first."
     case badRequest = "Bad request"
     case outdated = "The url you requested is outdated."
     case failed = "Network request failed."
     case noData = "Response returned with no data to decode."
     case unableToDecode = "We could not decode the response."
-}
-
-public enum Result<String> {
-    case success
-    case failure(String)
+    case failNetworkConnection = "Please check your network connection."
 }
 
 public struct NetworkManager {
-    static let environment : NetworkEnvironment = .production
+    static let environment: NetworkEnvironment = .production
     public static var APIKey = ""
-    let router = Router<TotalizatorApi>()
+    let router: Router<TotalizatorApi>
     
-    public init() {}
+    public init(_ session: URLSessionProxy = URLSession.shared) {
+        router = Router<TotalizatorApi>(session)
+    }
     
     // MARK: Auth
     
     public func login(login: String,
                       password: String,
-                      completion: @escaping (_ jwtToken: TokenBag?,_ error: String?) -> Void) {
+                      completion: @escaping (Result<TokenBag, ResponseError>) -> Void) {
         
         router.request(.login(login: login, password: password)) { data, response, error in
             
             self.responceDecodable(of: TokenBag.self,
                                    data: data,
                                    response: response,
-                                   error: error) { data, error in
-                completion(data, error)
+                                   error: error) { result in
+                completion(result)
             }
             
         }
@@ -51,7 +48,7 @@ public struct NetworkManager {
     public func registration(login: String,
                       password: String,
                       dateOfBirth: Date,
-                      completion: @escaping (_ jwtToken: TokenBag?,_ error: String?) -> Void) {
+                      completion: @escaping (Result<TokenBag, ResponseError>) -> Void) {
         
         router.request(.registration(login: login,
                                      password: password,
@@ -60,8 +57,8 @@ public struct NetworkManager {
             self.responceDecodable(of: TokenBag.self,
                                    data: data,
                                    response: response,
-                                   error: error) { data, error in
-                completion(data, error)
+                                   error: error) { result in
+                completion(result)
             }
             
         }
@@ -70,15 +67,15 @@ public struct NetworkManager {
     
     // MARK: Events
     
-    public func feed(completion: @escaping (_ feed: Feed?,_ error: String?) -> Void) {
+    public func feed(completion: @escaping (Result<Feed, ResponseError>) -> Void) {
         
         router.request(.feed) { data, response, error in
             
             self.responceDecodable(of: Feed.self,
                                    data: data,
                                    response: response,
-                                   error: error) { data, error in
-                completion(data, error)
+                                   error: error) { result in
+                completion(result)
             }
             
         }
@@ -87,30 +84,30 @@ public struct NetworkManager {
     
     // MARK: Wallet
     
-    public func wallet(completion: @escaping (_ wallet: WalletBag?,_ error: String?) -> Void) {
+    public func wallet(completion: @escaping (Result<WalletBag, ResponseError>) -> Void) {
         
         router.request(.wallet) { data, response, error in
             
             self.responceDecodable(of: WalletBag.self,
                                    data: data,
                                    response: response,
-                                   error: error) { data, error in
-                completion(data, error)
+                                   error: error) { result  in
+                completion(result)
             }
             
         }
         
     }
     
-    public func walletHistory(completion: @escaping (_ walletHistory: WalletHistory?,_ error: String?) -> Void) {
+    public func walletHistory(completion: @escaping (Result<WalletHistory, ResponseError>) -> Void) {
         
         router.request(.walletHistory) { data, response, error in
             
             self.responceDecodable(of: WalletHistory.self,
                                    data: data,
                                    response: response,
-                                   error: error) { data, error in
-                completion(data, error)
+                                   error: error) { result in
+                completion(result)
             }
             
         }
@@ -119,15 +116,15 @@ public struct NetworkManager {
     
     public func makeTransaction(amount: Double,
                               type: TransactionType,
-                              completion: @escaping (_ wallet: WalletBag?,_ error: String?) -> Void) {
+                              completion: @escaping (Result<WalletBag, ResponseError>) -> Void) {
         
         router.request(.makeTransaction(amount: amount, type: type)) { data, response, error in
             
             self.responceDecodable(of: WalletBag.self,
                                    data: data,
                                    response: response,
-                                   error: error) { data, error in
-                completion(data, error)
+                                   error: error) { result in
+                completion(result)
             }
             
         }
@@ -136,15 +133,15 @@ public struct NetworkManager {
     
     // MARK: Bets
     
-    public func getBets(completion: @escaping (_ bets: Bets?,_ error: String?) -> Void) {
+    public func getBets(completion: @escaping (Result<Bets, ResponseError>) -> Void) {
         
         router.request(.bets) { data, response, error in
             
             self.responceDecodable(of: Bets.self,
                                    data: data,
                                    response: response,
-                                   error: error) { data, error in
-                completion(data, error)
+                                   error: error) { result in
+                completion(result)
             }
             
         }
@@ -154,12 +151,12 @@ public struct NetworkManager {
     public func makeBet(amount: Double,
                         choice: PossibleResult,
                         eventID: String,
-                        completion: @escaping (_ error: String?) -> Void) {
+                        completion: @escaping (Result<Data, ResponseError>) -> Void) {
         
         router.request(.makeBet(amount: amount, choice: choice, eventID: eventID)) { data, response, error in
             
-            self.response(data: data, response: response, error: error) { error in
-                completion(error)
+            self.response(data: data, response: response, error: error) { result in
+                completion(result)
             }
             
         }
@@ -167,13 +164,18 @@ public struct NetworkManager {
     }
     
     
-    fileprivate func handleNetworkResponse(_ response: HTTPURLResponse) -> Result<String> {
+    fileprivate func handleNetworkResponse(_ response: HTTPURLResponse) -> ResponseError? {
         switch response.statusCode {
-        case 200...299: return .success
-        case 401...500: return .failure(NetworkResponse.authenticationError.rawValue)
-        case 501...599: return .failure(NetworkResponse.badRequest.rawValue)
-        case 600: return .failure(NetworkResponse.outdated.rawValue)
-        default: return .failure(NetworkResponse.failed.rawValue)
+        case 200...299:
+            return  nil
+        case 401...500:
+            return .authenticationError
+        case 501...599:
+            return .badRequest
+        case 600:
+            return .outdated
+        default:
+            return .failed
         }
     }
 }
@@ -183,20 +185,24 @@ private extension NetworkManager {
     func response(data: Data?,
                   response: URLResponse?,
                   error: Error?,
-                  completion: @escaping (String?) -> Void) {
+                  completion: @escaping (Result<Data, ResponseError>) -> Void) {
         
         if error != nil {
-            completion("Please check your network connection.")
+            completion(.failure(.failNetworkConnection))
         }
         
         if let response = response as? HTTPURLResponse {
-            let result = self.handleNetworkResponse(response)
-            switch result {
-            case .success:
-                completion(nil)
-            case .failure(let networkFailureError):
-                completion(networkFailureError)
+            
+            if let error = self.handleNetworkResponse(response) {
+                completion(.failure(error))
+            } else {
+                guard let responseData = data else {
+                    completion(.failure(.noData))
+                    return
+                }
+                completion(.success(responseData))
             }
+            
         }
         
     }
@@ -205,30 +211,29 @@ private extension NetworkManager {
                                          data: Data?,
                                          response: URLResponse?,
                                          error: Error?,
-                                         completion: @escaping (_ bets: T?,_ error: String?) -> Void) {
+                                         completion: @escaping (Result<T, ResponseError>) -> Void) {
         
         
         if error != nil {
-            completion(nil, "Please check your network connection.")
+            completion(.failure(.failNetworkConnection))
         }
         
         if let response = response as? HTTPURLResponse {
-            let result = self.handleNetworkResponse(response)
-            switch result {
-            case .success:
+            if let error = self.handleNetworkResponse(response) {
+                completion(.failure(error))
+            } else {
                 guard let responseData = data else {
-                    completion(nil, NetworkResponse.noData.rawValue)
+                    completion(.failure(.noData))
                     return
                 }
                 do {
                     let apiResponse = try JSONDecoder().decode(T.self, from: responseData)
-                    completion(apiResponse,nil)
+                    completion(.success(apiResponse))
                 } catch {
-                    completion(nil, NetworkResponse.unableToDecode.rawValue)
+                    completion(.failure(.unableToDecode))
                 }
-            case .failure(let networkFailureError):
-                completion(nil, networkFailureError)
             }
+            
         }
         
         

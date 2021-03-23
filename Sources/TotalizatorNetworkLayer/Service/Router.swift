@@ -16,10 +16,14 @@ protocol NetworkRouter: class {
 }
 
 class Router<EndPoint: EndPointType>: NetworkRouter {
-    private var task: URLSessionTask?
+    private var task: URLSessionDataTaskProxy?
+    private let session: URLSessionProxy
+    
+    init(_ session: URLSessionProxy = URLSession.shared) {
+        self.session = session
+    }
     
     func request(_ route: EndPoint, completion: @escaping NetworkRouterCompletion) {
-        let session = URLSession.shared
         do {
             let request = try self.buildRequest(from: route)
             NetworkLogger.log(request: request)
