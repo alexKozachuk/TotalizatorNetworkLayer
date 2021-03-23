@@ -82,6 +82,21 @@ public struct NetworkManager {
         
     }
     
+    public func getEvent(by id: String, completion: @escaping (Result<Event, ResponseError>) -> Void) {
+        
+        router.request(.getEvent(id: id)) { data, response, error in
+            
+            self.responceDecodable(of: Event.self,
+                                   data: data,
+                                   response: response,
+                                   error: error) { result in
+                completion(result)
+            }
+            
+        }
+        
+    }
+    
     // MARK: Wallet
     
     public func wallet(completion: @escaping (Result<WalletBag, ResponseError>) -> Void) {

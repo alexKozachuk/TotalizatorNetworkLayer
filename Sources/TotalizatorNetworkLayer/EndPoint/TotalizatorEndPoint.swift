@@ -20,6 +20,7 @@ public enum TotalizatorApi {
     case makeTransaction(amount: Double, type: TransactionType)
     case bets
     case makeBet(amount: Double, choice: PossibleResult, eventID: String)
+    case getEvent(id: String)
 }
 
 extension TotalizatorApi: EndPointType {
@@ -53,6 +54,8 @@ extension TotalizatorApi: EndPointType {
             return "/v1/bet/account"
         case .makeBet:
             return "/v1/bet"
+        case .getEvent(let id):
+            return "/Events/getEventPreview/\(id)"
         }
     }
     
@@ -60,7 +63,7 @@ extension TotalizatorApi: EndPointType {
         switch self {
         case .login, .registration, .makeTransaction, .makeBet:
             return .post
-        case .feed, .wallet, .walletHistory, .bets:
+        case .feed, .wallet, .walletHistory, .bets, .getEvent:
             return .get
         }
     }
