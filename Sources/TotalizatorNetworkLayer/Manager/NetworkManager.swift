@@ -202,6 +202,8 @@ private extension NetworkManager {
                   error: Error?,
                   completion: @escaping (Result<Data, ResponseError>) -> Void) {
         
+        NetworkLogger.log(data: data, response: response as? HTTPURLResponse, error: error)
+        
         if error != nil {
             completion(.failure(.failNetworkConnection))
         }
@@ -229,20 +231,14 @@ private extension NetworkManager {
                                          completion: @escaping (Result<T, ResponseError>) -> Void) {
         
         
-        if error != nil {
-            completion(.failure(.failNetworkConnection))
-        }
-        
-        if let response = response as? HTTPURLResponse {
-            if let error = self.handleNetworkResponse(response) {
+        self.response(data: data, response: response, error: error) { result in
+            
+            switch result {
+            case .failure(let error):
                 completion(.failure(error))
-            } else {
-                guard let responseData = data else {
-                    completion(.failure(.noData))
-                    return
-                }
+            case .success(let data):
                 do {
-                    let apiResponse = try JSONDecoder().decode(T.self, from: responseData)
+                    let apiResponse = try JSONDecoder().decode(T.self, from: data)
                     completion(.success(apiResponse))
                 } catch {
                     completion(.failure(.unableToDecode))

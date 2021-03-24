@@ -6,35 +6,77 @@
 //
 
 import Foundation
+import Logging
 
 class NetworkLogger {
+    
+    private static let logger = Logger(label: "TotalizatorNetworkLayer")
+    
+    private static let end = "\n - - - - - - - - - -  END - - - - - - - - - - \n"
+    
     static func log(request: URLRequest) {
         
-        print("\n - - - - - - - - - - OUTGOING - - - - - - - - - - \n")
-        defer { print("\n - - - - - - - - - -  END - - - - - - - - - - \n") }
+        let start = "\n - - - - - - - - - - OUTGOING(Request) - - - - - - - - - - \n"
+        let urlString = request.url?.absoluteString ?? ""
+        let components = NSURLComponents(string: urlString)
         
-        let urlAsString = request.url?.absoluteString ?? ""
-        let urlComponents = NSURLComponents(string: urlAsString)
+        let method = request.httpMethod != nil ? "\(request.httpMethod!)": ""
+        let path = "\(components?.path ?? "")"
+        let query = "\(components?.query ?? "")"
+        let host = "\(components?.host ?? "")"
         
-        let method = request.httpMethod != nil ? "\(request.httpMethod ?? "")" : ""
-        let path = "\(urlComponents?.path ?? "")"
-        let query = "\(urlComponents?.query ?? "")"
-        let host = "\(urlComponents?.host ?? "")"
-        
-        var logOutput = """
-                        \(urlAsString) \n\n
-                        \(method) \(path)?\(query) HTTP/1.1 \n
-                        HOST: \(host)\n
-                        """
+        var requestLog = start
+        requestLog += "\(urlString)"
+        requestLog += "\n\n"
+        requestLog += "\(method) \(path)?\(query) HTTP/1.1\n"
+        requestLog += "Host: \(host)\n"
         for (key,value) in request.allHTTPHeaderFields ?? [:] {
-            logOutput += "\(key): \(value) \n"
+            requestLog += "\(key): \(value)\n"
         }
-        if let body = request.httpBody {
-            logOutput += "\n \(NSString(data: body, encoding: String.Encoding.utf8.rawValue) ?? "")"
+        if let body = request.httpBody{
+            let bodyString = NSString(data: body, encoding: String.Encoding.utf8.rawValue) ?? "Can't render body; not utf8 encoded";
+            requestLog += "\n\(bodyString)\n"
         }
         
-        print(logOutput)
+        requestLog += end
+        
+        NetworkLogger.logger.info(Logger.Message(stringLiteral: requestLog))
     }
     
-    static func log(response: URLResponse) {}
+    static func log(data: Data?, response: HTTPURLResponse?, error: Error?){
+        
+        let start = "\n - - - - - - - - - - OUTGOING(Response) - - - - - - - - - - \n"
+        let urlString = response?.url?.absoluteString
+        let components = NSURLComponents(string: urlString ?? "")
+        
+        let path = "\(components?.path ?? "")"
+        let query = "\(components?.query ?? "")"
+        
+        var responseLog = start
+        if let urlString = urlString {
+            responseLog += "\(urlString)"
+            responseLog += "\n\n"
+        }
+        
+        if let statusCode =  response?.statusCode{
+            responseLog += "HTTP \(statusCode) \(path)?\(query)\n"
+        }
+        if let host = components?.host{
+            responseLog += "Host: \(host)\n"
+        }
+        for (key,value) in response?.allHeaderFields ?? [:] {
+            responseLog += "\(key): \(value)\n"
+        }
+        if let body = data{
+            let bodyString = NSString(data: body, encoding: String.Encoding.utf8.rawValue) ?? "Can't render body; not utf8 encoded";
+            responseLog += "\n\(bodyString)\n"
+        }
+        if let error = error{
+            responseLog += "\nError: \(error.localizedDescription)\n"
+        }
+        
+        responseLog += end
+        
+        NetworkLogger.logger.info(Logger.Message(stringLiteral: responseLog))
+    }
 }
