@@ -60,9 +60,13 @@ final class TotalizatorNetworkLayerTests: XCTestCase {
         
         session.nextData = expectedData
         
-        networkManager.login(login: "Login", password: "password") { token, error in
+        networkManager.login(login: "Login", password: "password") { result in
             
-            XCTAssert(error == nil)
+            guard let token = try? result.get() else {
+                XCTFail()
+                return
+            }
+            
             XCTAssertEqual(token, expectedObject)
             
             exp.fulfill()
