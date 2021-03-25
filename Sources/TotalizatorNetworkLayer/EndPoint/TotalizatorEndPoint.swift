@@ -23,6 +23,7 @@ public enum TotalizatorApi {
     case getEvent(id: String)
     case chat
     case sendMessage(text: String)
+    case userInfo
 }
 
 extension TotalizatorApi: EndPointType {
@@ -62,6 +63,8 @@ extension TotalizatorApi: EndPointType {
             return "/Chat"
         case .sendMessage:
             return "/Chat"
+        case .userInfo:
+            return "/Account/\(NetworkManager.APIKey)"
         }
     }
     
@@ -124,6 +127,11 @@ extension TotalizatorApi: EndPointType {
                                                 additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
         case .sendMessage(let text):
             return .requestParametersAndHeaders(bodyParameters: ["text": text],
+                                                bodyEncoding: .jsonEncoding,
+                                                urlParameters: nil,
+                                                additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
+        case .userInfo:
+            return .requestParametersAndHeaders(bodyParameters: nil,
                                                 bodyEncoding: .jsonEncoding,
                                                 urlParameters: nil,
                                                 additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])

@@ -211,6 +211,19 @@ public struct NetworkManager {
         
     }
     
+    public func getUserInfo(completion: @escaping (Result<UserInfo, ResponseError>) -> Void) {
+        
+        router.request(.userInfo) { data, response, error in
+            self.responceDecodable(of: UserInfo.self,
+                                   data: data,
+                                   response: response,
+                                   error: error) { result in
+                completion(result)
+            }
+        }
+        
+    }
+    
     
     fileprivate func handleNetworkResponse(_ response: HTTPURLResponse) -> ResponseError? {
         switch response.statusCode {
