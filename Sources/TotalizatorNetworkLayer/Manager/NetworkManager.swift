@@ -50,9 +50,12 @@ public struct NetworkManager {
                       dateOfBirth: Date,
                       completion: @escaping (Result<TokenBag, ResponseError>) -> Void) {
         
+        let username = login.components(separatedBy: "@").first ?? "Sasha"
+        
         router.request(.registration(login: login,
                                      password: password,
-                                     dateOfBirth: dateOfBirth)) { data, response, error in
+                                     dateOfBirth: dateOfBirth,
+                                     username: username)) { data, response, error in
             
             self.responceDecodable(of: TokenBag.self,
                                    data: data,
@@ -169,6 +172,36 @@ public struct NetworkManager {
                         completion: @escaping (Result<Data, ResponseError>) -> Void) {
         
         router.request(.makeBet(amount: amount, choice: choice, eventID: eventID)) { data, response, error in
+            
+            self.response(data: data, response: response, error: error) { result in
+                completion(result)
+            }
+            
+        }
+        
+    }
+    
+    // MARK: Chat
+    
+    public func getChat(completion: @escaping (Result<Messages, ResponseError>) -> Void) {
+        
+        router.request(.chat) { data, response, error in
+            
+            self.responceDecodable(of: Bets.self,
+                                   data: data,
+                                   response: response,
+                                   error: error) { result in
+                completion(result)
+            }
+            
+        }
+        
+    }
+    
+    public func sendMessage(text: String,
+                            completion: @escaping (Result<Data, ResponseError>) -> Void) {
+        
+        router.request(.sendMessage(text: text)) { data, response, error in
             
             self.response(data: data, response: response, error: error) { result in
                 completion(result)

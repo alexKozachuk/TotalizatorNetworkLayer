@@ -13,7 +13,7 @@ enum NetworkEnvironment {
 
 public enum TotalizatorApi {
     case login(login: String, password: String)
-    case registration(login: String, password: String, dateOfBirth: Date)
+    case registration(login: String, password: String, dateOfBirth: Date, username: String)
     case feed
     case wallet
     case walletHistory
@@ -21,6 +21,8 @@ public enum TotalizatorApi {
     case bets
     case makeBet(amount: Double, choice: PossibleResult, eventID: String)
     case getEvent(id: String)
+    case chat
+    case sendMessage(text: String)
 }
 
 extension TotalizatorApi: EndPointType {
@@ -39,31 +41,35 @@ extension TotalizatorApi: EndPointType {
     var path: String {
         switch self {
         case .login:
-            return "/v1/Auth/Login"
+            return "/Auth/login"
         case .registration:
-            return "/v1/Auth/register"
+            return "/Auth/register"
         case .feed:
             return "/Events/feed"
         case .wallet:
-            return "/v1/wallet"
+            return "/Wallet"
         case .walletHistory:
-            return "/v1/wallet/transactionHistory"
+            return "/Wallet"
         case .makeTransaction:
-            return "/v1/wallet/transaction"
+            return "/Wallet/transaction"
         case .bets:
-            return "/v1/bet/account"
+            return "/Bet/\(NetworkManager.APIKey)"
         case .makeBet:
-            return "/v1/bet"
+            return "/Bet"
         case .getEvent(let id):
-            return "/Events/getEventPreview/\(id)"
+            return "/Events/preview/\(id)"
+        case .chat:
+            return "/Chat"
+        case .sendMessage:
+            return "/Chat"
         }
     }
     
     var httpMethod: HTTPMethod {
         switch self {
-        case .login, .registration, .makeTransaction, .makeBet:
+        case .login, .registration, .makeTransaction, .makeBet, .sendMessage:
             return .post
-        case .feed, .wallet, .walletHistory, .bets, .getEvent:
+        case .feed, .wallet, .walletHistory, .bets, .getEvent, .chat:
             return .get
         }
     }
@@ -75,11 +81,12 @@ extension TotalizatorApi: EndPointType {
                                                        "password": password],
                                       bodyEncoding: .jsonEncoding,
                                       urlParameters: nil)
-        case .registration(let login, let password, let dateOfBirth):
+        case .registration(let login, let password, let dateOfBirth, let username):
             return .requestParameters(bodyParameters: ["email": login,
                                                        "password": password,
                                                        "dob": dateOfBirth.isoDateFormat,
-                                                       "accountCreationTime": Date().isoDateFormat],
+                                                       "accountCreationTime": Date().isoDateFormat,
+                                                       "username": username],
                                       bodyEncoding: .jsonEncoding,
                                       urlParameters: nil)
         case .wallet:
@@ -107,6 +114,16 @@ extension TotalizatorApi: EndPointType {
             return .requestParametersAndHeaders(bodyParameters: ["event_Id": eventID,
                                                                  "choice": choice.rawValue,
                                                                  "amount": amount],
+                                                bodyEncoding: .jsonEncoding,
+                                                urlParameters: nil,
+                                                additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
+        case .chat:
+            return .requestParametersAndHeaders(bodyParameters: nil,
+                                                bodyEncoding: .jsonEncoding,
+                                                urlParameters: nil,
+                                                additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
+        case .sendMessage(let text):
+            return .requestParametersAndHeaders(bodyParameters: ["text": text],
                                                 bodyEncoding: .jsonEncoding,
                                                 urlParameters: nil,
                                                 additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
