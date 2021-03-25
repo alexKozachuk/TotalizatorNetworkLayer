@@ -15,7 +15,8 @@ public struct Messages: Codable {
 // MARK: - Message
 public struct Message: Codable {
     public let id, text, username, accountID: String
-    public let avatarLink, time: String
+    public let avatarLink: String?
+    public let time: String
 
     enum CodingKeys: String, CodingKey {
         case id, text, username
