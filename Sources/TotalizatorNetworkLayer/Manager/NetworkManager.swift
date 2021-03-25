@@ -187,7 +187,7 @@ public struct NetworkManager {
         
         router.request(.chat) { data, response, error in
             
-            self.responceDecodable(of: Bets.self,
+            self.responceDecodable(of: Messages.self,
                                    data: data,
                                    response: response,
                                    error: error) { result in
