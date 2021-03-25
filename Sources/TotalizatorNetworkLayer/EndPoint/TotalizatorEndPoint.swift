@@ -72,7 +72,7 @@ extension TotalizatorApi: EndPointType {
         switch self {
         case .login, .registration, .makeTransaction, .makeBet, .sendMessage:
             return .post
-        case .feed, .wallet, .walletHistory, .bets, .getEvent, .chat:
+        case .feed, .wallet, .walletHistory, .bets, .getEvent, .chat, .userInfo:
             return .get
         }
     }
