@@ -8,14 +8,14 @@
 import Foundation
 
 // MARK: - Messages
-struct Messages: Codable {
-    let messages: [Message]
+public struct Messages: Codable {
+    public let messages: [Message]
 }
 
 // MARK: - Message
-struct Message: Codable {
-    let id, text, username, accountID: String
-    let avatarLink, time: String
+public struct Message: Codable {
+    public let id, text, username, accountID: String
+    public let avatarLink, time: String
 
     enum CodingKeys: String, CodingKey {
         case id, text, username
