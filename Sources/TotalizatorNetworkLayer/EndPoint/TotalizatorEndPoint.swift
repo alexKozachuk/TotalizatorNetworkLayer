@@ -64,7 +64,7 @@ extension TotalizatorApi: EndPointType {
         case .sendMessage:
             return "/Chat"
         case .userInfo:
-            return "/Account/\(NetworkManager.APIKey)"
+            return "/Account/profile"
         }
     }
     
