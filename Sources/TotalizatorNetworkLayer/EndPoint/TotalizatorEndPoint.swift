@@ -50,15 +50,15 @@ extension TotalizatorApi: EndPointType {
         case .wallet:
             return "/Wallet"
         case .walletHistory:
-            return "/Wallet"
+            return "/Wallet/history"
         case .makeTransaction:
-            return "/Wallet/transaction"
+            return "/Wallet"
         case .bets:
-            return "/Bet/\(NetworkManager.APIKey)"
+            return "/Bet/history"
         case .makeBet:
             return "/Bet"
         case .getEvent(let id):
-            return "/Events/preview/\(id)"
+            return "/Events/\(id)/preview"
         case .chat:
             return "/Chat"
         case .sendMessage:
