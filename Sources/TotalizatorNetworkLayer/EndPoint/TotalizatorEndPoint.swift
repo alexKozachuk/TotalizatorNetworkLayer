@@ -103,16 +103,18 @@ extension TotalizatorApi: EndPointType {
                                                 urlParameters: nil,
                                                 additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
         case .makeTransaction(let amount, let type):
-            return .requestParametersAndHeaders(bodyParameters: nil,
+            return .requestParametersAndHeaders(bodyParameters: ["amount": amount,
+                                                                 "type":type.rawValue],
                                                 bodyEncoding: .jsonEncoding,
-                                                urlParameters: ["amount": amount,
-                                                                "type":type.rawValue],
-                                                additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
+                                                urlParameters: nil,
+                                                additionHeaders: [
+                                                    "Authorization":"Bearer \(NetworkManager.APIKey)"])
         case .bets:
             return .requestParametersAndHeaders(bodyParameters: nil,
                                                 bodyEncoding: .jsonEncoding,
                                                 urlParameters: nil,
-                                                additionHeaders: ["Authorization":"Bearer \(NetworkManager.APIKey)"])
+                                                additionHeaders: [
+                                                    "Authorization":"Bearer \(NetworkManager.APIKey)"])
         case .makeBet(let amount, let choice, let eventID):
             return .requestParametersAndHeaders(bodyParameters: ["event_Id": eventID,
                                                                  "choice": choice.rawValue,
