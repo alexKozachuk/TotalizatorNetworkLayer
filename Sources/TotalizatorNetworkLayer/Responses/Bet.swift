@@ -7,17 +7,21 @@
 
 import Foundation
 
-// MARK: - Bet
-public struct Bet: Codable {
-    public let accountID, eventID: String
-    public let choice: PossibleResult
-    public let amount: Int
-
-    enum CodingKeys: String, CodingKey {
-        case accountID = "account_Id"
-        case eventID = "event_Id"
-        case choice, amount
-    }
+// MARK: - Bets
+public struct Bets: Codable {
+    public let betsPreviewForUsers: [BetsPreviewForUser]
 }
 
-public typealias Bets = [Bet]
+// MARK: - BetsPreviewForUser
+public struct BetsPreviewForUser: Codable {
+    public let betID, teamConfrontation: String
+    public let choice: PossibleResult
+    public let eventStartime, betTime: String
+    public let amount: Int
+    public let status: String?
+
+    enum CodingKeys: String, CodingKey {
+        case betID = "bet_Id"
+        case teamConfrontation, choice, eventStartime, betTime, amount, status
+    }
+}
