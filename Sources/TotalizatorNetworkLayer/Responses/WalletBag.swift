@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct WalletBag: Codable {
+public struct WalletBag: Codable, Equatable {
     
     public let amount: Double
     

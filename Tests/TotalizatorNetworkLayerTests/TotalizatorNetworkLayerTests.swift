@@ -72,12 +72,134 @@ final class TotalizatorNetworkLayerTests: XCTestCase {
             exp.fulfill()
         }
         
+        wait(for: [exp], timeout: 5)
+    }
+    
+    func testRegistration() {
+        let exp = expectation(description: "should register")
+        
+        let expectedData =
+        """
+        {
+            "jwtString": "token",
+        }
+        """.data(using: .utf8)
+        
+        let expectedObject = TokenBag(jwtString: "token")
+        
+        session.nextData = expectedData
+        
+        networkManager.registration(login: "Login", password: "password", dateOfBirth: Date(timeIntervalSinceNow: -599581594)) { result in
+            
+            guard let token = try? result.get() else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssertEqual(token, expectedObject)
+            
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 5)
+    }
+    
+    func testWalletAmount() {
+        let exp = expectation(description: "should get wallet ammount")
+        
+        let expectedData =
+            """
+            {
+              "amount": 333
+            }
+            """.data(using: .utf8)
+        
+        let expectedAmmount = WalletBag(amount: 333)
+        
+        session.nextData = expectedData
+        
+        networkManager.wallet { result in
+            
+            guard let amount = try? result.get() else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssertNotNil(amount)
+            XCTAssertEqual(amount, expectedAmmount)
+            
+            exp.fulfill()
+        }
         
         wait(for: [exp], timeout: 5)
     }
 
+    func testAddingMoneyToWallet() {
+        let exp = expectation(description: "should add money to wallet")
+        
+        let expectedData =
+            """
+            {
+              "amount": 333
+            }
+            """.data(using: .utf8)
+        
+        let expectedAmmount = WalletBag(amount: 333)
+        
+        session.nextData = expectedData
+        
+        networkManager.makeTransaction(amount: 333, type: .deposit) { result in
+            
+            guard let amount = try? result.get() else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssertNotNil(amount)
+            XCTAssertEqual(amount, expectedAmmount)
+            
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 5)
+    }
+    
+    func testWithdrawingMoneyFromWallet() {
+        let exp = expectation(description: "should withdraw money from wallet")
+        
+        let expectedData =
+            """
+            {
+              "amount": 3
+            }
+            """.data(using: .utf8)
+        
+        let expectedAmmount = WalletBag(amount: 3)
+        
+        session.nextData = expectedData
+        
+        networkManager.makeTransaction(amount: 330, type: .withdraw) { result in
+            
+            guard let amount = try? result.get() else {
+                XCTFail()
+                return
+            }
+            
+            XCTAssertNotNil(amount)
+            XCTAssertEqual(amount, expectedAmmount)
+            
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 5)
+    }
+    
     static var allTests = [
         ("testRouterRequest", testRouterSimpleRequest),
-        ("testLogin", testLogin)
+        ("testLogin", testLogin),
+        ("testRegistration", testRegistration),
+        ("testWalletAmount", testWalletAmount),
+        ("testAddingMoneyToWallet", testAddingMoneyToWallet),
+        ("testWithdrawingMoneyFromWallet", testWithdrawingMoneyFromWallet)
     ]
 }
