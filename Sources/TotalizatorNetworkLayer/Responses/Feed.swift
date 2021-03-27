@@ -27,10 +27,16 @@ public struct Event: Codable {
 public struct Participant: Codable {
     public let id, name: String
     public let photoLink: String?
+    public let parameters: [ParticipantParameters]
 }
 
 public enum PossibleResult: String, Codable {
     case w1 = "W1"
     case w2 = "W2"
     case x = "X"
+}
+
+public struct ParticipantParameters: Codable {
+    var type: String
+    var value: String
 }
