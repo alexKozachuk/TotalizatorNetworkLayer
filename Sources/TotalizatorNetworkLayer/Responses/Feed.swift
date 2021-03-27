@@ -37,6 +37,6 @@ public enum PossibleResult: String, Codable {
 }
 
 public struct ParticipantParameters: Codable {
-    var type: String
-    var value: String
+    public var type: String
+    public var value: String
 }
