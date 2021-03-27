@@ -26,7 +26,7 @@ public struct Event: Codable {
 // MARK: - Participant
 public struct Participant: Codable {
     public let id, name: String
-    public let photoLink: String
+    public let photoLink: String?
 }
 
 public enum PossibleResult: String, Codable {
