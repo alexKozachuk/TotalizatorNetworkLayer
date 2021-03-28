@@ -8,12 +8,12 @@
 import Foundation
 
 // MARK: - Bets
-public struct Bets: Codable {
+public struct Bets: Codable, Equatable {
     public let betsPreviewForUsers: [BetsPreviewForUser]
 }
 
 // MARK: - BetsPreviewForUser
-public struct BetsPreviewForUser: Codable {
+public struct BetsPreviewForUser: Codable, Equatable {
     public let betID, teamConfrontation: String
     public let choice: PossibleResult
     public let eventStartime, betTime: String

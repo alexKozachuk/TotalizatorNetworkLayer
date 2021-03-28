@@ -8,12 +8,12 @@
 import Foundation
 
 // MARK: - Messages
-public struct Messages: Codable {
+public struct Messages: Codable, Equatable {
     public let messages: [Message]
 }
 
 // MARK: - Message
-public struct Message: Codable {
+public struct Message: Codable, Equatable {
     public let id, text, username, accountID: String
     public let avatarLink: String?
     public let time: String

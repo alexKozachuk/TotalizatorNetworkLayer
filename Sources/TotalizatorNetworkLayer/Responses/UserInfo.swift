@@ -8,6 +8,6 @@
 import Foundation
 
 // MARK: - UserInfo
-public struct UserInfo: Codable {
+public struct UserInfo: Codable, Equatable {
     public let id, username, avatarLink: String
 }
