@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - WalletHistoryElement
-public struct WalletHistoryElement: Codable {
+public struct WalletHistoryElement: Codable, Equatable {
     public let amount: Double
     public let type, dateTime: String
 }
