@@ -20,7 +20,7 @@ public struct Event: Codable, Equatable {
     public let margin: Double
     public let possibleResults: [PossibleResult]
     public let isEnded: Bool
-    public let amountW1, amountW2, amountX: Int
+    public let amountW1, amountW2, amountX: Double
 }
 
 // MARK: - Participant
